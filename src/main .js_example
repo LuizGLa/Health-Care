@@ -6,7 +6,7 @@ import router from './router'
 import store from './store'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
-export const CLIENT_ID = '587860084574-kjlho9on0qfm5fslbhtge6l62k9i0tjj.apps.googleusercontent.com'
+export const CLIENT_ID = 'Seu client ID'
 
 createApp(App)
   .use(store)
