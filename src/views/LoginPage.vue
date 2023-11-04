@@ -22,7 +22,7 @@
 
 import { googleSdkLoaded } from 'vue3-google-login'
 import router from '@/router'
-import { CLIENT_ID, scope } from '@/main'
+import { CLIENT_ID, scope } from '@/dataClient'
 
 const login = () => {
   googleSdkLoaded((google) => {
