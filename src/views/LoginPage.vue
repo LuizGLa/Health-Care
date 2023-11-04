@@ -4,33 +4,43 @@
       <div class="boxLogo">
         <img class="logo" src="../assets/logos/LogoProj.png">
       </div>
-    <button @click="callback" type="button"
-    class="btn btn-md"
-    style="
+      <button
+        @click="login"
+        type="button"
+        class="btn btn-md"
+        style="
     border-radius: 20px;
     box-shadow: 0px 3px 10px rgba(6, 40, 133, 0.26);
     background-color: aliceblue;">
-      <img src="../assets/logos/google.svg"> <label>Logar com o google</label>
-    </button>
-  </div>
+        <img src="../assets/logos/google.svg"> <label>Logar com o google</label>
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup>
 
-import { googleTokenLogin } from 'vue3-google-login'
+import { googleSdkLoaded } from 'vue3-google-login'
 import router from '@/router'
+import { CLIENT_ID, scope } from '@/main'
 
-const callback = () => {
-  googleTokenLogin().then((response) => {
-    const accessToken = response.access_token
-    sessionStorage.setItem('accessToken', accessToken)
-    router.push('/fitness')
+const login = () => {
+  googleSdkLoaded((google) => {
+    google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID,
+      scope: scope,
+      callback: (response) => {
+        const accessToken = response.access_token
+        sessionStorage.setItem('accessToken', accessToken)
+        router.push('/fitness')
+        console.log(response)
+      }
+    }).requestAccessToken()
   })
 }
 
 </script>
-<style>
+<style scoped>
 .page {
   display: flex;
   justify-content: center;

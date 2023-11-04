@@ -1,13 +1,40 @@
 <template>
-  <button @click="logout">Logout</button>
-  <div v-if="user">
-    {{ user.name }}
+  <div class="header d-flex justify-content-between align-items-center">
+    <div class="d-flex justify-content-center flex-grow-1">
+      <img class="logo" src="../assets/logos/LogoProj.png">
+    </div>
+    <div class="ms-auto">
+      <button class="logout" @click="logout">
+        Sair
+        <i class="fas fa-sign-out"></i>
+      </button>
+    </div>
   </div>
-     <h1>Passos Diários</h1>
-       <p>{{ steps }}</p>
-       <p>{{ moveMinutes }}</p>
-       <p>{{ distance }}</p>
 
+  <div class="d-flex justify-content-center ">
+    <div class=" cardAll d-flex flex-column justify-content-center">
+      <div class="cardUserInfo d-flex">
+        <div v-if="user" style="margin-left: 3em;">
+          <div class="boxImgUser">
+            <img class="userImg rounded-circle " :src="user.picture"/>
+          </div>
+          <div class="boxNameUser">
+            <h2>{{ user.name }}</h2>
+            {{ height }}
+            {{ weight }}
+          </div>
+        </div>
+      </div>
+      <div class="boxCard">
+        <div class="Card">
+          <h1>Passos Diários</h1>
+          <p>{{ steps }}</p>
+          <p>{{ moveMinutes }}</p>
+          <p>{{ distance }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -20,27 +47,26 @@ const loggedIn = ref(false)
 const steps = ref(null)
 const moveMinutes = ref(null)
 const distance = ref(null)
+const height = ref(null)
+const weight = ref(null)
 const token = sessionStorage.getItem('accessToken')
-console.log(token)
 
 const getDataFitness = (token) => {
   axios.get(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${token}`)
     .then((response) => {
       user.value = response.data
-      console.log(user.value.name)
+      console.log(user.value)
       loggedIn.value = true
     })
     .catch((error) => {
       console.error(error)
     })
 
-  const now = new Date('2023-11-03T00:00:00Z')
+  const now = new Date()
+  const offset = now.getTimezoneOffset() * 60000
 
-  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
-
-  const startTimeMillis = startOfDay.getTime()
-  const endTimeMillis = endOfDay.getTime()
+  const startTimeMillis = now.getTime() - offset - 86400000
+  const endTimeMillis = now.getTime() - offset + 86400000
 
   fetch('https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate', {
     method: 'POST',
@@ -59,8 +85,18 @@ const getDataFitness = (token) => {
       {
         dataTypeName: 'com.google.distance.delta',
         dataSourceId: 'derived:com.google.distance.delta:com.google.android.gms:merge_distance_delta'
-      }],
-      bucketByTime: { durationMillis: 86400000 }, // Agrupa os dados em intervalos de 1 hora
+      },
+      {
+        dataTypeName: 'com.google.height:com.google.android.gms:merge_height',
+        dataSourceId: 'derived:com.google.height:com.google.android.gms:merge_height'
+      },
+      {
+        dataTypeName: 'com.google.weight:com.google.android.gms:merge_weight',
+        dataSourceId: 'derived:com.google.weight:com.google.android.gms:merge_weight'
+      }
+
+      ],
+      bucketByTime: { durationMillis: 86400000 },
       startTimeMillis: startTimeMillis,
       endTimeMillis: endTimeMillis
 
@@ -72,6 +108,10 @@ const getDataFitness = (token) => {
       steps.value = data.bucket[0].dataset[0].point[0].value[0].intVal
       moveMinutes.value = data.bucket[0].dataset[1].point[0].value[0].intVal
       distance.value = (data.bucket[0].dataset[2].point[0].value[0].fpVal * 0.000621371).toFixed(2)
+      height.value = data.bucket[0].dataset[3].point[0].value[0].fpVal
+      weight.value = data.bucket[0].dataset[4].point[0].value[0].fpVal
+      console.log('height', height.value)
+      console.log('weight', weight.value)
     })
     .catch(error => console.error('Error:', error))
 }
@@ -82,6 +122,61 @@ const logout = () => {
   loggedIn.value = false
   router.push('/')
 }
-
 getDataFitness(token)
 </script>
+
+<style scoped>
+.cardAll {
+  height: 80vh;
+  width: 100vh;
+}
+
+i{ margin-left: 0.1em;}
+.logo {
+  width: 6.0em;
+  margin-left: 5em;
+}
+.header {
+  background: linear-gradient(1deg, #f7f7f7b4 0%, #ffffffef 100%);
+  box-shadow: 0px 5px 10px rgba(6, 40, 133, 0.26);
+}
+.logout {
+  background-color: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0px 3px 10px rgba(6, 40, 133, 0.26);
+  font-weight: bold;
+  border: none;
+  color: rgb(9, 80, 112);
+  padding: 0.5em;
+  margin-right: 1.5em;
+  font-size: 0.9em;
+}
+
+.logout:hover {
+  scale: 1.03;
+  transition: 0.5s;
+}
+.cardUserInfo{
+  border-top-right-radius: 15px;
+  border-top-left-radius: 15px;
+  background-color: rgb(9, 80, 112);
+  color: rgb(255, 255, 255);
+}
+.boxCard {
+  background: linear-gradient(1deg, #feffff 0%, #edf6fff8 100%);
+  border-bottom-right-radius: 15px;
+  border-bottom-left-radius: 15px;
+  box-shadow: 0px 3px 15px rgba(6, 40, 133, 0.13);
+}
+.userImg {
+  width: 4em;
+  border: 3px solid rgb(255, 255, 255);
+  margin: 0.5em;
+}
+
+h2 {
+  font-size: 1.0em;
+  font-weight: bold;
+}
+
+</style>
