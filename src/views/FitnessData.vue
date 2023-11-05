@@ -20,7 +20,9 @@
           </div>
           <div class="boxNameUser">
             <h2>{{ user.name }}</h2>
-            {{ height }} {{ weight }}
+            <div class="dataBody">
+                <dataBody nameValue="Peso:" :dataValue="weight" description="kg"></dataBody>
+            </div>
           </div>
         </div>
       </div>
@@ -41,6 +43,7 @@
         <div>
           <dataTypes nameValue="Calorias:" :dataValue="calories" classIcon="fas fa-fire" description="kcal"></dataTypes>
         </div>
+        
       </div>
     </div>
   </div>
@@ -52,6 +55,7 @@ import router from '@/router'
 import axios from 'axios'
 import { ref } from 'vue'
 import dataTypes from '@/components/dataTypes.vue'
+import dataBody from '@/components/dataBody.vue'
 
 const user = ref(null)
 const loggedIn = ref(false)
@@ -59,7 +63,6 @@ const steps = ref(null)
 const moveMinutes = ref(null)
 const distance = ref(null)
 const calories = ref(null)
-const height = ref(null)
 const weight = ref(null)
 const token = sessionStorage.getItem('accessToken')
 
@@ -103,13 +106,9 @@ const getDataFitness = (token) => {
       dataSourceId: 'derived:com.google.calories.expended:com.google.android.gms:merge_calories_expended'
     },
     {
-    dataTypeName: 'com.google.height',
-    dataSourceId: 'derived:com.google.height:com.google.android.gms:merge_height'
-  },
-  {
     dataTypeName: 'com.google.weight.summary',
     dataSourceId: 'derived:com.google.weight:com.google.android.gms:merge_weight'
-  }
+    }
      ],
       bucketByTime: { durationMillis: 86400000 },
       startTimeMillis: startTimeMillis,
@@ -119,13 +118,12 @@ const getDataFitness = (token) => {
   })
     .then(response => response.json())
     .then(data => {
-      console.log(data)
       steps.value = data.bucket[0].dataset[0].point[0].value[0].intVal
       moveMinutes.value = data.bucket[0].dataset[1].point[0].value[0].intVal
       distance.value = (data.bucket[0].dataset[2].point[0].value[0].fpVal * 0.000621371).toFixed(2)
       calories.value = data.bucket[0].dataset[3].point[0].value[0].fpVal.toFixed(1)
-      height.value = data.bucket[0].dataset[4].point[0].value[0].fpVal;
-      weight.value = data.bucket[0].dataset[5].point[0].value[0].fpVal
+      weight.value = data.bucket[0].dataset[4].point[0].value[0].fpVal.toFixed(1)
+    
     })
     .catch(error => console.error('Error:', error))
 }
