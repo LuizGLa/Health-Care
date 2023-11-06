@@ -162,8 +162,8 @@ const fetchData = async () => {
     steps.value = response.data.bucket[0].dataset[0].point[0].value[0].intVal;
     moveMinutes.value = response.data.bucket[0].dataset[1].point[0].value[0].intVal;
     distance.value = (response.data.bucket[0].dataset[2].point[0].value[0].fpVal * 0.000621371).toFixed(2);
-    calories.value = response.data.bucket[0].dataset[3].point[0].value[0].fpVal.toFixed(1);
-    weight.value = response.data.bucket[0].dataset[4].point[0].value[0].fpVal.toFixed(1);
+    calories.value = response.data.bucket[0].dataset[3].point[0].value[0].fpVal.toFixed(0);
+    weight.value = response.data.bucket[0].dataset[4].point[0].value[0].fpVal.toFixed(2);
     height.value = response.data.bucket[0].dataset[5].point[0].value[0].fpVal.toFixed(2);
   } catch (error) {
     console.error('Erro:', error);
