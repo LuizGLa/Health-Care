@@ -33,7 +33,6 @@ const login = () => {
         const accessToken = response.access_token
         sessionStorage.setItem('accessToken', accessToken)
         router.push('/fitness')
-        console.log(response)
       }
     }).requestAccessToken()
   })
