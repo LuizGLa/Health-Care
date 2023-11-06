@@ -96,7 +96,7 @@ const gender = ref(null)
 const basalRate = ref(0)
 const token = sessionStorage.getItem('accessToken')
 
-const conversionGenderForBr = (gender) => {
+const conversionGenderForBr = async (gender) => {
   gender.value = gender.value === 'Male' ? 'Masculino' : 'Feminino';
 }
 
@@ -121,9 +121,10 @@ const fetchData = async () => {
   }
   try {
     const now = new Date();
-    const offset = now.getTimezoneOffset() * 60000;
-    const startTimeMillis = now.getTime() - offset - 86400000;
-    const endTimeMillis = now.getTime() - offset + 86400000;
+    const offset = now.getTimezoneOffset() * 60 * 1000;
+    const startTimeMillis = now.setHours(0,0,0,0) + offset;
+    const endOfDay = new Date();
+    const endTimeMillis = endOfDay.setHours(23,59,59,999) + offset;
 
     const response = await axios.post('https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate', {
       aggregateBy: [{
@@ -173,8 +174,9 @@ const fetchData = async () => {
 
 onMounted(async () => {
   await fetchData();
-  conversionGenderForBr(gender)
+  conversionGenderForBr(gender);
 });
+
 
 const useConfirmBeforeAction = (props) => {
   const { reveal} = createConfirmDialog(dialogInfo, props)
