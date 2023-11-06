@@ -1,4 +1,7 @@
 # health-care
+## IMPORTANTE !
+
+Leia o arquivo dataClient.js_example e siga a instrução pra funcionamento do projeto.
 
 ## Project setup
 ```
