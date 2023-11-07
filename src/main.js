@@ -7,6 +7,7 @@ import store from './store'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { CLIENT_ID } from './dataClient'
 import * as ConfirmDialog from 'vuejs-confirm-dialog'
+import './registerServiceWorker'
 
 createApp(App)
   .use(store)
