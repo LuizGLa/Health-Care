@@ -159,12 +159,25 @@ const fetchData = async () => {
         'Content-Type': 'application/json',
       },
     });
-    steps.value = response.data.bucket[0].dataset[0].point[0].value[0].intVal;
-    moveMinutes.value = response.data.bucket[0].dataset[1].point[0].value[0].intVal;
-    distance.value = (response.data.bucket[0].dataset[2].point[0].value[0].fpVal * 0.000621371).toFixed(2);
-    calories.value = response.data.bucket[0].dataset[3].point[0].value[0].fpVal.toFixed(0);
-    weight.value = response.data.bucket[0].dataset[4].point[0].value[0].fpVal.toFixed(2);
-    height.value = response.data.bucket[0].dataset[5].point[0].value[0].fpVal.toFixed(2);
+    console.log(response.data)
+    if (response.data.bucket[0].dataset[0].point.length > 0) {
+      steps.value = response.data.bucket[0].dataset[0].point[0].value[0].intVal;
+    }
+    if (response.data.bucket[0].dataset[1].point.length > 0) {
+      moveMinutes.value = response.data.bucket[0].dataset[1].point[0].value[0].intVal;
+    }
+    if (response.data.bucket[0].dataset[2].point.length > 0) {
+      distance.value = (response.data.bucket[0].dataset[2].point[0].value[0].fpVal * 0.000621371).toFixed(2);
+    }
+    if (response.data.bucket[0].dataset[3].point.length > 0) {
+      calories.value = response.data.bucket[0].dataset[3].point[0].value[0].fpVal.toFixed(2);
+    }
+    if (response.data.bucket[0].dataset[4].point.length > 0) {
+      weight.value = response.data.bucket[0].dataset[4].point[0].value[0].fpVal.toFixed(2);
+    }
+    if (response.data.bucket[0].dataset[5].point.length > 0) {
+      height.value = response.data.bucket[0].dataset[5].point[0].value[0].fpVal.toFixed(2);
+    }
   } catch (error) {
     console.error('Erro:', error);
   }
