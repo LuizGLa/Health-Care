@@ -44,22 +44,28 @@
         </div>
       </div>
       <div class="boxCard">
-        <div class="bannerInfoDay">
           <label id="info">Informações diárias</label>
-        </div>
-        <div class="teste d-flex flex-column justify-content-center">
+        <div class="teste">
         <div class="groupData row row-cols-2">
-        <div>
-          <dataTypes nameValue="Passos:" :dataValue="steps" classIcon="fas fa-shoe-prints"></dataTypes>
+        <div class="col">
+          <div class="d-flex justify-content-center">
+            <dataTypes nameValue="Passos:" :dataValue="steps" classIcon="fas fa-shoe-prints"></dataTypes>
+          </div>
         </div>
-        <div>
-          <dataTypes nameValue="Move min:" :dataValue="moveMinutes" classIcon="fas fa-running" description="min" ></dataTypes>
+        <div class="col">
+          <div class="d-flex justify-content-center">
+            <dataTypes nameValue="Move min:" :dataValue="moveMinutes" classIcon="fas fa-running" description="min" ></dataTypes>
+          </div>
         </div>
-        <div>
-          <dataTypes nameValue="Distância:" :dataValue="distance" classIcon="fas fa-road" description="mi"></dataTypes>
+        <div class="col">
+          <div class="d-flex justify-content-center">
+            <dataTypes nameValue="Distância:" :dataValue="distance" classIcon="fas fa-road" description="mi"></dataTypes>
+          </div>
         </div>
-        <div>
-          <dataTypes nameValue="Calorias:" :dataValue="calories" classIcon="fas fa-fire" description="kcal"></dataTypes>
+        <div class="col">
+          <div class="d-flex justify-content-center">
+            <dataTypes nameValue="Calorias:" :dataValue="calories" classIcon="fas fa-fire" description="kcal"></dataTypes>
+          </div>
         </div>
       </div>
     </div>
@@ -67,6 +73,7 @@
   </div>
   </div>
 </template>
+
 
 <script setup>
 import router from '@/router'
@@ -252,7 +259,6 @@ i{ margin-left: 0.1em;}
   width: 5em;
   margin-bottom: 0.9em;
 }
-
 .infoDialog:hover{
   width: 7em;
   margin-bottom: 0.9em;
@@ -272,6 +278,10 @@ i{ margin-left: 0.1em;}
 .boxCard {
   max-width: 40em;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   background: linear-gradient(1deg, #feffff 0%, #edf6fff8 100%);
   border-bottom-right-radius: 15px;
   border-bottom-left-radius: 15px;
