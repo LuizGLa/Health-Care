@@ -27,3 +27,18 @@ export async function  basalRateCalculator(age, height, gender, weight) {
 
   return brc
  }
+
+export async function  recommendedWaterPerDay(weight) {
+  const water = weight * 0.035;
+  return water;
+}
+
+export async function resetTMB(TMB) {
+  TMB < 0 ? TMB = 0 : TMB = TMB;
+  return TMB;
+}
+
+export async function resetAge(age) {
+  age > 1000 ? age = 0 : age = age;
+  return age;
+}

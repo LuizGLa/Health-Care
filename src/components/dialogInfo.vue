@@ -10,6 +10,7 @@
   <li><strong>Distância:</strong> Indica a distância percorrida em milhas durante o período especificado.</li>
   <li><strong>Calorias:</strong> Representa a quantidade de calorias gastas no decorrer do dia.</li>
   <li><strong>TMB:</strong> Representa a Taxa de Metabolismo Basal, que é a quantidade mínima de energia necessária para sustentar as funções vitais do organismo em repouso.</li>
+  <li><strong>Água por dia:</strong> Representa a quantidade ideal de consumo de água por dia com base no seu peso.</li>
 </ul>
       <div class="modal-action">
         <button class="modal-button" @click="emit('confirm')">Fechar</button>
@@ -28,8 +29,9 @@
   .title{
     text-align: center;
     margin-bottom: 1.5em;
-    font-size: 1.5em;
-    padding: 0.3em;
+    font-size: 1.1em;
+    padding: 0.2em;
+    width: 20em;
     border-radius: 40px;
     color: #fff;
     background-color: rgb(9, 80, 112);
@@ -51,11 +53,13 @@
     border: 2px solid rgba(9, 79, 112, 0.445);
     border-radius: 10px;
     text-align: start;
-    padding: 20px 40px;
+    padding: 20px 30px;
     font-size: small;
     max-width: 500px;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
   .modal-action {
     display: flex;

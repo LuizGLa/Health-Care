@@ -41,6 +41,9 @@
           <div>
             <dataBody nameValue="Gênero:"  :dataValue="gender"></dataBody>
           </div>
+          <div>
+            <dataBody nameValue="Água por dia:"  :dataValue="waterPerDay" description="L"></dataBody>
+          </div>
         </div>
       </div>
       <div class="boxCard">
@@ -81,7 +84,7 @@ import axios from 'axios'
 import { onMounted, ref } from 'vue'
 import dataTypes from '@/components/dataTypes.vue'
 import dataBody from '@/components/dataBody.vue'
-import { basalRateCalculator, conversionDateForAge } from '@/functions_user/functions_utils.js'
+import { basalRateCalculator, conversionDateForAge, recommendedWaterPerDay } from '@/functions_user/functions_utils.js'
 import { createConfirmDialog } from 'vuejs-confirm-dialog'
 import dialogInfo from '../components/dialogInfo.vue'
 
@@ -101,22 +104,26 @@ const day = ref(null)
 const age = ref(0)
 const gender = ref(null)
 const basalRate = ref(0)
+const waterPerDay = ref(0)
 const token = sessionStorage.getItem('accessToken')
 
 const conversionGenderForBr = async (gender) => {
   gender.value = gender.value === 'Male' ? 'Masculino' : 'Feminino';
 }
 
-const fetchData = async () => {
+const axiosInstance = axios.create({
+  headers: {
+    Authorization: 'Bearer ' + token,
+    'Content-Type': 'application/json',
+  },
+});
+
+const fetchUserInfo = async () => {
   try {
-    const response = await axios.get(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${token}`);
+    const response = await axiosInstance.get('https://www.googleapis.com/oauth2/v3/userinfo');
     user.value = response.data;
     loggedIn.value = true;
-    const data = await axios.get('https://people.googleapis.com/v1/people/me?personFields=birthdays,genders', {
-      headers: {
-        Authorization: 'Bearer ' + token,
-      },
-    });
+    const data = await axiosInstance.get('https://people.googleapis.com/v1/people/me?personFields=birthdays,genders');
     dateReturn.value = data.data.birthdays[0].date;
     gender.value = data.data.genders[0].formattedValue;
     yearBirth.value = dateReturn.value.year;
@@ -126,14 +133,36 @@ const fetchData = async () => {
   } catch (error) {
     console.error(error);
   }
+};
+
+const fetchFitnessData = async () => {
   try {
     const now = new Date();
     const offset = now.getTimezoneOffset() * 60 * 1000;
-    const startTimeMillis = now.setHours(0,0,0,0) + offset;
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(now.getDate() - 7);
+    const startTimeMillisWeek = oneWeekAgo.setHours(0,0,0,0) + offset;
+    const startTimeMillisDay = now.setHours(0,0,0,0) + offset;
     const endOfDay = new Date();
     const endTimeMillis = endOfDay.setHours(23,59,59,999) + offset;
 
-    const response = await axios.post('https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate', {
+
+    const responseWeek = await axiosInstance.post('https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate', {
+      aggregateBy: [{
+        dataTypeName: 'com.google.weight.summary',
+        dataSourceId: 'derived:com.google.weight:com.google.android.gms:merge_weight',
+      },
+      {
+        dataTypeName: 'com.google.height',
+        dataSourceId: 'derived:com.google.height:com.google.android.gms:merge_height',
+      }],
+      bucketByTime: { durationMillis: 604800000 },
+      startTimeMillis: startTimeMillisWeek,
+      endTimeMillis: endTimeMillis,
+    });
+
+
+    const responseDay = await axiosInstance.post('https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate', {
       aggregateBy: [{
         dataTypeName: 'com.google.step_count.delta',
         dataSourceId: 'derived:com.google.step_count.delta:com.google.android.gms:estimated_steps',
@@ -148,53 +177,42 @@ const fetchData = async () => {
       {
         dataTypeName: 'com.google.calories.expended',
         dataSourceId: 'derived:com.google.calories.expended:com.google.android.gms:merge_calories_expended',
-      },
-      {
-        dataTypeName: 'com.google.weight.summary',
-        dataSourceId: 'derived:com.google.weight:com.google.android.gms:merge_weight',
-      },
-      {
-        dataTypeName: 'com.google.height',
-        dataSourceId: 'derived:com.google.height:com.google.android.gms:merge_height',
       }],
       bucketByTime: { durationMillis: 86400000 },
-      startTimeMillis: startTimeMillis,
+      startTimeMillis: startTimeMillisDay,
       endTimeMillis: endTimeMillis,
-    }, {
-      headers: {
-        Authorization: 'Bearer ' + token,
-        'Content-Type': 'application/json',
-      },
     });
-    console.log(response.data)
-    if (response.data.bucket[0].dataset[0].point.length > 0) {
-      steps.value = response.data.bucket[0].dataset[0].point[0].value[0].intVal;
+
+    if (responseDay.data.bucket[0].dataset[0].point.length > 0) {
+      steps.value = responseDay.data.bucket[0].dataset[0].point[0].value[0].intVal;
     }
-    if (response.data.bucket[0].dataset[1].point.length > 0) {
-      moveMinutes.value = response.data.bucket[0].dataset[1].point[0].value[0].intVal;
+    if (responseDay.data.bucket[0].dataset[1].point.length > 0) {
+      moveMinutes.value = responseDay.data.bucket[0].dataset[1].point[0].value[0].intVal;
     }
-    if (response.data.bucket[0].dataset[2].point.length > 0) {
-      distance.value = (response.data.bucket[0].dataset[2].point[0].value[0].fpVal * 0.000621371).toFixed(2);
+    if (responseDay.data.bucket[0].dataset[2].point.length > 0) {
+      distance.value = (responseDay.data.bucket[0].dataset[2].point[0].value[0].fpVal * 0.000621371).toFixed(2);
     }
-    if (response.data.bucket[0].dataset[3].point.length > 0) {
-      calories.value = response.data.bucket[0].dataset[3].point[0].value[0].fpVal.toFixed(2);
+    if (responseDay.data.bucket[0].dataset[3].point.length > 0) {
+      calories.value = responseDay.data.bucket[0].dataset[3].point[0].value[0].fpVal.toFixed(2);
     }
-    if (response.data.bucket[0].dataset[4].point.length > 0) {
-      weight.value = response.data.bucket[0].dataset[4].point[0].value[0].fpVal.toFixed(2);
+    if (responseWeek.data.bucket[0].dataset[0].point.length > 0) {
+      weight.value = responseWeek.data.bucket[0].dataset[0].point[0].value[0].fpVal.toFixed(2);
     }
-    if (response.data.bucket[0].dataset[5].point.length > 0) {
-      height.value = response.data.bucket[0].dataset[5].point[0].value[0].fpVal.toFixed(2);
+    if (responseWeek.data.bucket[0].dataset[1].point.length > 0) {
+      height.value = responseWeek.data.bucket[0].dataset[1].point[0].value[0].fpVal.toFixed(2);
     }
   } catch (error) {
     console.error('Erro:', error);
   }
-  age.value = await conversionDateForAge(yearBirth.value);
-  basalRate.value = (await basalRateCalculator(age.value, height.value, gender.value, weight.value)).toFixed(0)
 };
 
 onMounted(async () => {
-  await fetchData();
+  await fetchUserInfo();
+  await fetchFitnessData();
   conversionGenderForBr(gender);
+  age.value = await conversionDateForAge(yearBirth.value);
+  basalRate.value = (await basalRateCalculator(age.value, height.value, gender.value, weight.value)).toFixed(0)
+  waterPerDay.value = (await recommendedWaterPerDay(weight.value)).toFixed(1)
 });
 
 
