@@ -237,6 +237,10 @@ const logout = () => {
   height: 80vh;
   width: 80vh;
   margin: 1.0em;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 label {
